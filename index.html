@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Grow a Garden - Pet Selector</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Fredoka One', cursive, Arial, sans-serif;
+      background: url('https://i.imgur.com/yOURIMAGE.png') no-repeat center center fixed;
+      /* Replace above URL with the actual target image from your image host */
+      background-size: cover;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-shadow: 1px 1px 4px #0008;
+    }
+
+    .container {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+      text-align: center;
+      width: 480px;
+      max-width: 90vw;
+    }
+
+    h1 {
+      margin-bottom: 25px;
+      font-size: 2.8rem;
+      color: #ffd700;
+      text-shadow: 2px 2px 8px #ffb700cc;
+    }
+
+    input {
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      width: 85%;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: bold;
+      box-shadow: 0 0 8px #00c851aa;
+      outline: none;
+      transition: box-shadow 0.3s ease;
+    }
+
+    input:focus {
+      box-shadow: 0 0 16px #00ff77cc;
+    }
+
+    .pet-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+      margin-top: 25px;
+    }
+
+    .pet-card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px #00c85188;
+      user-select: none;
+    }
+
+    .pet-card:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.07);
+      box-shadow: 0 0 25px #00ff77cc;
+    }
+
+    .pet-card img {
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 0 3px #0008);
+    }
+
+    .pet-card.selected {
+      border: 3px solid gold;
+      box-shadow: 0 0 28px gold;
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    button, a {
+      display: inline-block;
+      margin-top: 25px;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 12px;
+      background: #00c851;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.3s, box-shadow 0.3s;
+      text-decoration: none;
+      box-shadow: 0 0 14px #00c851cc;
+      user-select: none;
+    }
+
+    button:hover, a:hover {
+      background: #007e33;
+      box-shadow: 0 0 28px #007e33;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #status {
+      margin-top: 14px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      min-height: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Grow a Garden - Pet Selector</h1>
+    <input type="text" id="username" placeholder="Enter Roblox Username" autocomplete="off" />
+    <br />
+    <button id="proceedBtn">Proceed</button>
+    <p id="status"></p>
+
+    <div id="petSelection" class="hidden">
+      <h2>Select Your Pet</h2>
+      <div class="pet-grid" id="petGrid"></div>
+      <button id="claimBtn" class="hidden">Join Private Server to Claim</button>
+    </div>
+  </div>
+
+  <script>
+    const proceedBtn = document.getElementById("proceedBtn");
+    const claimBtn = document.getElementById("claimBtn");
+    const statusText = document.getElementById("status");
+    const usernameInput = document.getElementById("username");
+    const petSelection = document.getElementById("petSelection");
+    const petGrid = document.getElementById("petGrid");
+
+    const pets = [
+      { name: "Dragonfly", img: "https://img.growagardenwiki.net/images/pets/Dragonfly.webp" },
+      { name: "Raccoon", img: "https://img.growagardenwiki.net/images/pets/Raccoon.webp" },
+      { name: "Queen Bee", img: "https://img.growagardenwiki.net/images/pets/Queen-Bee-(Pet).webp" },
+      { name: "Mimic Octopus", img: "https://img.growagardenwiki.net/images/pets/Mimic-Octopus.webp" },
+      { name: "Kitsune", img: "https://img.growagardenwiki.net/images/pets/Kitsune.webp" },
+      { name: "Fennec Fox", img: "https://img.growagardenwiki.net/images/pets/Fennec-Fox.webp" },
+      { name: "Disco Bee", img: "https://img.growagardenwiki.net/images/pets/Disco-Bee.webp" },
+      { name: "Butterfly", img: "https://img.growagardenwiki.net/images/pets/Butterfly.webp" }
+    ];
+
+    let selectedPet = null;
+
+    proceedBtn.addEventListener("click", () => {
+      const username = usernameInput.value.trim();
+      if (!username) {
+        statusText.textContent = "❌ Please enter a username first.";
+        petSelection.classList.add("hidden");
+        claimBtn.classList.add("hidden");
+        return;
+      }
+      statusText.textContent = `✅ Welcome, ${username}! Choose your pet below.`;
+      petSelection.classList.remove("hidden");
+
+      petGrid.innerHTML = "";
+      selectedPet = null;
+      claimBtn.classList.add("hidden");
+
+      pets.forEach(pet => {
+        const card = document.createElement("div");
+        card.className = "pet-card";
+        card.innerHTML = `<img src="${pet.img}" alt="${pet.name}" /><p>${pet.name}</p>`;
+        card.addEventListener("click", () => {
+          document.querySelectorAll(".pet-card").forEach(c => c.classList.remove("selected"));
+          card.classList.add("selected");
+          selectedPet = pet;
+          claimBtn.classList.remove("hidden");
+        });
+        petGrid.appendChild(card);
+      });
+    });
+
+    claimBtn.addEventListener("click", () => {
+      if (!selectedPet) return alert("Please select a pet first!");
+      window.open("https://robiox.st/games/126884695634066/Grow-a-Garden?privateServerLinkCode=05847761969171027720544470118437", "_blank");
+    });
+  </script>
+</body>
+</html>
