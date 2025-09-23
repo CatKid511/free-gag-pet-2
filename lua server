@@ -1,30 +1,39 @@
-local HttpService = game:GetService("HttpService")
-local CLAIM_API = "http://YOUR-SERVER-IP-OR-DOMAIN:3000/redeem"
+-- Roblox ServerScript: Polls claim API and rewards player in-game
 
-local function giveItemToPlayer(player, item)
-    -- Replace this with your in-game logic for giving pets/seeds
-    print(player.Name .. " gets item: " .. item)
-    -- e.g., game.ServerStorage.Pets[item]:Clone().Parent = player.Backpack
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+
+local API_URL = "https://your-vercel-site.vercel.app/api/claim"
+
+-- Simple in-memory check to avoid double-rewarding
+local claimed = {}
+
+-- Poll for claims every 10s for each player
+function checkClaim(player)
+    if claimed[player.UserId] then return end
+    local username = player.Name
+    local url = API_URL .. "?username=" .. HttpService:UrlEncode(username)
+    local success, response = pcall(function()
+        return HttpService:GetAsync(url)
+    end)
+    if not success then
+        warn("Claim check failed for", username)
+        return
+    end
+    local data = HttpService:JSONDecode(response)
+    if data and data.success and data.item then
+        claimed[player.UserId] = true
+        -- Reward logic (customize as needed)
+        print(username .. " claimed: " .. data.item)
+        -- For example, give item:
+        -- GivePlayerItem(player, data.item)
+        player:Kick("Congrats! You claimed: " .. data.item)
+    end
 end
 
-game.Players.PlayerAdded:Connect(function(player)
-    -- Wait for player to fully join
-    wait(2)
-    local success, response = pcall(function()
-        return HttpService:PostAsync(
-            CLAIM_API,
-            HttpService:JSONEncode({ username = player.Name }),
-            Enum.HttpContentType.ApplicationJson
-        )
-    end)
-    if success then
-        local data = HttpService:JSONDecode(response)
-        if data.item then
-            giveItemToPlayer(player, data.item)
-            -- Optionally, notify the player
-            player:Kick("You have received: " .. data.item .. "! (Demo: replace with in-game reward message)")
-        end
-    else
-        warn("Failed to contact claim server: " .. tostring(response))
+Players.PlayerAdded:Connect(function(player)
+    while player.Parent do
+        checkClaim(player)
+        wait(10)
     end
 end)
