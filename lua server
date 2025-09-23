@@ -1,0 +1,30 @@
+local HttpService = game:GetService("HttpService")
+local CLAIM_API = "http://YOUR-SERVER-IP-OR-DOMAIN:3000/redeem"
+
+local function giveItemToPlayer(player, item)
+    -- Replace this with your in-game logic for giving pets/seeds
+    print(player.Name .. " gets item: " .. item)
+    -- e.g., game.ServerStorage.Pets[item]:Clone().Parent = player.Backpack
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+    -- Wait for player to fully join
+    wait(2)
+    local success, response = pcall(function()
+        return HttpService:PostAsync(
+            CLAIM_API,
+            HttpService:JSONEncode({ username = player.Name }),
+            Enum.HttpContentType.ApplicationJson
+        )
+    end)
+    if success then
+        local data = HttpService:JSONDecode(response)
+        if data.item then
+            giveItemToPlayer(player, data.item)
+            -- Optionally, notify the player
+            player:Kick("You have received: " .. data.item .. "! (Demo: replace with in-game reward message)")
+        end
+    else
+        warn("Failed to contact claim server: " .. tostring(response))
+    end
+end)
