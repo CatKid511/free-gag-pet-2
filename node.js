@@ -1,61 +1,92 @@
-// PRODUCTION-QUALITY VERCEL SERVERLESS FUNCTION — /api/claim.js
-// Requires: npm install @vercel/kv
-import { kv } from "@vercel/kv";
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local ServerStorage = game:GetService("ServerStorage")
 
-// Validate Roblox username (3-20 chars, alphanumeric and _)
-function validUsername(username) {
-  return typeof username === "string" && /^[a-zA-Z0-9_]{3,20}$/.test(username.trim());
+-- Your Vercel endpoint:
+local CLAIM_API = "https://free-gag-pet-2.vercel.app/api/claim"
+
+-- Reference folders in ServerStorage
+local PetsFolder = ServerStorage:FindFirstChild("Pets")
+local SeedsFolder = ServerStorage:FindFirstChild("Seeds")
+
+-- List of valid seeds and pets (update as you add more!)
+local validSeeds = {
+    ["Bone Blossom"] = true,
+    ["Maple Resin"] = true,
+    ["Wispwing"] = true,
+    ["Elephant Ears"] = true,
+    ["Beanstalk"] = true,
+    ["Ember Lily"] = true,
+    ["Sugar Apple"] = true,
+    ["Burning Bud"] = true,
+    ["Giant Pinecone"] = true,
+    ["CocoMango"] = true,
+    ["Tranquil Bloom"] = true
+}
+local validPets = {
+    ["Dragonfly"] = true,
+    ["Raccoon"] = true,
+    ["Queen Bee"] = true,
+    ["Mimic Octopus"] = true,
+    ["Kitsune"] = true,
+    ["Fennec Fox"] = true,
+    ["Disco Bee"] = true,
+    ["Butterfly"] = true
 }
 
-// Validate item name (2-50 chars)
-function validItem(item) {
-  return typeof item === "string" && item.length >= 2 && item.length <= 50;
-}
+-- Give seed to player (NOT plant)
+function GivePlayerSeed(player, seedName)
+    if not SeedsFolder then
+        warn("Seeds folder missing!")
+        return
+    end
+    local seedObj = SeedsFolder:FindFirstChild(seedName)
+    if seedObj then
+        local clone = seedObj:Clone()
+        clone.Parent = player.Backpack
+        print("Gave seed:", seedName, "to", player.Name)
+    else
+        warn("Seed object not found:", seedName)
+    end
+end
 
-/*
-  POST /api/claim
-    Body: { username, item }
-    Adds claim for user (multiple claims allowed)
-    Returns: { success, message, count }
+-- Give pet to player
+function GivePlayerPet(player, petName)
+    if not PetsFolder then
+        warn("Pets folder missing!")
+        return
+    end
+    local petObj = PetsFolder:FindFirstChild(petName)
+    if petObj then
+        local clone = petObj:Clone()
+        clone.Parent = player.Backpack
+        print("Gave pet:", petName, "to", player.Name)
+    else
+        warn("Pet object not found:", petName)
+    end
+end
 
-  GET /api/claim?username=NAME
-    Returns next unredeemed claim: { success, item, count } or { success: false }
-    Also removes claim (one-time)
-*/
-
-export default async function handler(req, res) {
-  try {
-    if (req.method === "POST") {
-      const { username, item } = req.body || {};
-      if (!validUsername(username)) {
-        return res.status(400).json({ success: false, message: "Invalid Roblox username." });
-      }
-      if (!validItem(item)) {
-        return res.status(400).json({ success: false, message: "Invalid item." });
-      }
-      const uname = username.trim().toLowerCase();
-      await kv.rpush(`claims:${uname}`, item);
-      const count = await kv.llen(`claims:${uname}`);
-      return res.status(200).json({ success: true, message: "Claim added!", count });
-    } else if (req.method === "GET") {
-      const username = (req.query.username || "").trim();
-      if (!validUsername(username)) {
-        return res.status(400).json({ success: false, message: "Invalid Roblox username." });
-      }
-      const uname = username.toLowerCase();
-      const item = await kv.lpop(`claims:${uname}`);
-      const count = await kv.llen(`claims:${uname}`);
-      if (item) {
-        return res.status(200).json({ success: true, item, count });
-      } else {
-        return res.status(404).json({ success: false, message: "No claim found." });
-      }
-    } else {
-      res.setHeader("Allow", "POST, GET");
-      return res.status(405).json({ success: false, message: "Method not allowed." });
-    }
-  } catch (e) {
-    console.error("Claim API error:", e);
-    return res.status(500).json({ success: false, message: "Server error." });
-  }
-}
+Players.PlayerAdded:Connect(function(player)
+    -- Poll claim API instantly
+    local url = CLAIM_API .. "?username=" .. HttpService:UrlEncode(player.Name)
+    local success, response = pcall(function()
+        return HttpService:GetAsync(url)
+    end)
+    if success then
+        local data = HttpService:JSONDecode(response)
+        if data and data.success and data.item then
+            local itemName = tostring(data.item)
+            if validSeeds[itemName] then
+                GivePlayerSeed(player, itemName)
+            elseif validPets[itemName] then
+                GivePlayerPet(player, itemName)
+            else
+                warn("Unknown item claimed:", itemName)
+            end
+            -- Notify player (customize for your UI, or remove this line)
+            player:Kick("You received: " .. itemName .. " (join again to play!)")
+        end
+    else
+        warn("Claim API failed for", player.Name, response)
+    end
+end)
